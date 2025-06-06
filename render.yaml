@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: ai-interview-assistant
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "streamlit run app.py --server.port=$PORT --server.enableCORS=false"
+    envVars:
+      - key: OPENROUTER_API_KEY
+        value: "your_api_key_here"
