@@ -1,0 +1,9 @@
+streamlit
+python-dotenv
+requests
+speechrecognition
+pyaudio
+pyttsx3
+
+
+
