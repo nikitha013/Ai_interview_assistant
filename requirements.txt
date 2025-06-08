@@ -1,0 +1,10 @@
+streamlit
+python-dotenv
+requests
+streamlit-webrtc
+
+
+
+
+
+
