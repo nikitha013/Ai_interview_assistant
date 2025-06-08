@@ -2,8 +2,6 @@ import os
 import requests
 import streamlit as st
 from dotenv import load_dotenv
-from streamlit_webrtc import webrtc_streamer, WebRtcMode
-import av
 
 load_dotenv()
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
@@ -17,7 +15,7 @@ HEADERS = {
 
 st.set_page_config(page_title="AI Interview Assistant", page_icon="💬", layout="centered")
 
-# ---------- LLM Functions ---------- #
+# ---------- API Wrapper ---------- #
 def ask_openrouter(prompt):
     response = requests.post(
         "https://openrouter.ai/api/v1/chat/completions",
@@ -33,6 +31,7 @@ def ask_openrouter(prompt):
     else:
         return f"❌ Error: {response.status_code}\n{response.text}"
 
+# ---------- Prompt Templates ---------- #
 def generate_questions_by_round(job_desc, round_type):
     prompt = f"""
 You are a senior interviewer. Based on this job description, generate 4 {round_type} interview questions.
@@ -86,7 +85,7 @@ def generate_question_by_round(round_name):
 
 def give_detailed_feedback(question, answer):
     prompt = f"""
-You are an interview coach. Give concise feedback (max 4 lines) and a suggested improved answer.
+You are an interview coach. Give concise feedback (max 4 lines) and suggest an improved answer.
 
 Question: {question}
 Candidate's Answer: {answer}
@@ -98,7 +97,7 @@ Format:
 """
     return ask_openrouter(prompt)
 
-# ---------- Streamlit Tabs ---------- #
+# ---------- UI ---------- #
 tab1, tab2 = st.tabs(["📄 Generate Questions", "🧠 Practice & Feedback"])
 
 # --- Tab 1: Question Generator --- #
@@ -140,29 +139,19 @@ with tab2:
     if question:
         st.markdown(f"**🎯 {feedback_round} Question:** {question}")
     else:
-        st.info("Click above to get a question.")
+        st.info("Click the button to get a question.")
 
-    answer_method = st.radio("Answer using:", ["Text", "Voice"])
-
-    if answer_method == "Text":
-        answer = st.text_area("Write your answer here:")
-    else:
-        st.warning("🎙️ Voice input enabled (for local use only)")
-        st.markdown("Due to Streamlit limitations, please **write what you said** below after recording.")
-
-        # Streamlit WebRTC component (non-functional for actual speech recognition)
-        webrtc_streamer(key="audio", mode=WebRtcMode.SENDONLY)
-
-        answer = st.text_area("Write what you spoke (for feedback):")
+    answer = st.text_area("✍️ Type your answer below:")
 
     if st.button("✅ Get Feedback"):
         if not question or not answer:
-            st.warning("Provide both question and answer.")
+            st.warning("Please provide both question and answer.")
         else:
             with st.spinner("Generating feedback..."):
                 feedback = give_detailed_feedback(question, answer)
                 st.markdown("### ✍️ Feedback & Suggested Answer")
                 st.success(feedback)
+
 
 
 
